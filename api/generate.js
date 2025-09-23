@@ -1,7 +1,8 @@
 import JSZip from "jszip";
 import { PDFDocument } from "pdf-lib";
 import Papa from "papaparse";
-import sharp from 'sharp';
+import {jsPDF} from "jspdf";
+import "svg2pdf.js";
 
 export const config = {
   runtime: "nodejs",
@@ -43,23 +44,16 @@ export default async function handler(req, res) {
         modifiedSvg = modifiedSvg.replace(`{{${param}}}`, row.param);
       });
 
-      // svgString: tu SVG obtenido de Inkscape
-      const svgBuffer = Buffer.from(modifiedSvg);
-      const pngBuffer = await sharp(modifiedSvg).png().toBuffer(); // Convierte SVG a PNG
+      const doc = new jsPDF('p', 'pt', 'a4'); // Create a new jsPDF document
 
-      const pdfDoc = await PDFDocument.create();
-      const page = pdfDoc.addPage([400, 200]);
+      await doc.svg(modifiedSvg, {
+          x: 0, // X-coordinate for placing the SVG
+          y: 0, // Y-coordinate for placing the SVG
+          width: 500, // Desired width in PDF points
+          height: 300 // Desired height in PDF points
+      })
 
-      // Añadir imagen PNG al PDF
-      const pngImage = await pdfDoc.embedPng(pngBuffer);
-      page.drawImage(pngImage, {
-        x: 0,
-        y: 0,
-        width: page.getWidth(),
-        height: page.getHeight()
-      });
-
-      const pdfBytes = await pdfDoc.save();
+      const pdfBytes = await doc.output('arraybuffer');
 
       // Agregar al zip
       zip.file(`file_${count}.pdf`, pdfBytes);
