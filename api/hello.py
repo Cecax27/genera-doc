@@ -1,7 +1,7 @@
-from http.server import BaseHTTPRequestHandler
+from fastapi import FastAPI
 
-def handler(request):
-    return {
-        "statusCode": 200,
-        "body": "Hello, Vercel!"
-    }
+app = FastAPI()
+
+@app.get("/")
+def read_root():
+    return {"Hello": "Vercel!"}
