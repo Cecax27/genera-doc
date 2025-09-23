@@ -3,6 +3,48 @@ import { PDFDocument } from "pdf-lib";
 import Papa from "papaparse";
 import {jsPDF} from "jspdf";
 import "svg2pdf.js";
+import { PDFDocument } from 'pdf-lib';
+
+const convertSvgToPDF = async (svgText) => {
+  if (!svgText) return;
+  
+  // Create a new canvas
+  const canvas = document.createElement('canvas');
+  const context = canvas.getContext('2d');
+  const img = new Image();
+
+  // Set up canvas size based on SVG dimensions
+  img.onload = async () => {
+    canvas.width = img.width;
+    canvas.height = img.height;
+    context.drawImage(img, 0, 0, img.width, img.height);
+
+    // Get the canvas as a PNG
+    const pngUrl = canvas.toDataURL('image/png');
+    
+    // Create PDF using pdf-lib
+    const pdfDoc = await PDFDocument.create();
+    const page = pdfDoc.addPage([img.width, img.height]);
+
+    // Embed PNG image into PDF
+    const pngImage = await pdfDoc.embedPng(pngUrl);
+    page.drawImage(pngImage, {
+      x: 0,
+      y: 0,
+      width: img.width,
+      height: img.height,
+    });
+
+    // Save PDF and trigger download
+    const pdfBytes = await pdfDoc.save();
+
+    return pdfBytes;
+  };
+
+  // Set the SVG file data as the image source
+  img.src = `data:image/svg+xml;base64,${btoa(svgText)}`;
+};
+
 
 export const config = {
   runtime: "nodejs",
@@ -44,16 +86,9 @@ export default async function handler(req, res) {
         modifiedSvg = modifiedSvg.replace(`{{${param}}}`, row.param);
       });
 
-      const doc = new jsPDF('p', 'pt', 'a4'); // Create a new jsPDF document
-
-      await doc.svg(modifiedSvg, {
-          x: 0, // X-coordinate for placing the SVG
-          y: 0, // Y-coordinate for placing the SVG
-          width: 500, // Desired width in PDF points
-          height: 300 // Desired height in PDF points
-      })
-
-      const pdfBytes = await doc.output('arraybuffer');
+      console.log(modifiedSvg);
+      
+      const pdfBytes = convertSvgToPDF(modifiedSvg)
 
       // Agregar al zip
       zip.file(`file_${count}.pdf`, pdfBytes);
