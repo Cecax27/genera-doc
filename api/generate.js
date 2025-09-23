@@ -82,7 +82,7 @@ export default async function handler(req, res) {
         modifiedSvg = modifiedSvg.replace(`{{${param}}}`, row.param);
       });
       
-      const pdfBytes = awaitconvertSvgToPDF(modifiedSvg)
+      const pdfBytes = await convertSvgToPDF(modifiedSvg)
 
       // Agregar al zip
       zip.file(`file_${count}.pdf`, pdfBytes);
