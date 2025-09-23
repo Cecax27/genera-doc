@@ -4,7 +4,7 @@ import { PDFDocument } from "pdf-lib";
 import Papa from "papaparse";
 
 export const config = {
-  runtime: "nodejs18.x", // o "nodejs" si necesitas fs, puppeteer, etc.
+  runtime: "nodejs", // o "nodejs" si necesitas fs, puppeteer, etc.
 };
 
 export default async function handler(req) {
