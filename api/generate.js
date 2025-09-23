@@ -1,7 +1,10 @@
 import JSZip from "jszip";
 import { PDFDocument } from "pdf-lib";
 import Papa from "papaparse";
-import { PDFDocument } from 'pdf-lib';
+
+export const config = {
+  runtime: "nodejs",
+};
 
 const convertSvgToPDF = async (svgText) => {
   if (!svgText) return;
@@ -43,11 +46,6 @@ const convertSvgToPDF = async (svgText) => {
   img.src = `data:image/svg+xml;base64,${btoa(svgText)}`;
 };
 
-
-export const config = {
-  runtime: "nodejs",
-};
-
 export default async function handler(req, res) {
   if (req.method !== "POST") {
     res.status(405).json({ error: "Only POST allowed" });
@@ -86,7 +84,7 @@ export default async function handler(req, res) {
 
       console.log(modifiedSvg);
       
-      const pdfBytes = await convertSvgToPDF(modifiedSvg)
+      const pdfBytes = awaitconvertSvgToPDF(modifiedSvg)
 
       // Agregar al zip
       zip.file(`file_${count}.pdf`, pdfBytes);
