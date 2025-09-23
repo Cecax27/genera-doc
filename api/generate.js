@@ -1,6 +1,7 @@
 import JSZip from "jszip";
 import { PDFDocument } from "pdf-lib";
 import Papa from "papaparse";
+import sharp from 'sharp';
 
 export const config = {
   runtime: "nodejs",
@@ -22,7 +23,12 @@ export default async function handler(req, res) {
     });
 
     const { svg, csv } = body;
-
+    const params = [...new Set(
+          csv
+            .split("{{")
+            .slice(1)
+            .map((param) => param.split("}}")[0].trim())
+        )];
     // Parsear CSV
     const { data: rows } = Papa.parse(csv, { header: true });
 
@@ -32,12 +38,27 @@ export default async function handler(req, res) {
 
     for (const row of rows) {
       // Modificar el SVG (ejemplo: reemplazar marcador {{name}})
-      let modifiedSvg = svg.replace("{{name}}", row.name);
+      let modifiedSvg = svg;
+      params.forEach(param => {
+        modifiedSvg = modifiedSvg.replace(`{{${param}}}`, row.param);
+      });
 
-      // Crear un PDF
+      // svgString: tu SVG obtenido de Inkscape
+      const svgBuffer = Buffer.from(svgString);
+      const pngBuffer = await sharp(svgBuffer).png().toBuffer(); // Convierte SVG a PNG
+
       const pdfDoc = await PDFDocument.create();
       const page = pdfDoc.addPage([400, 200]);
-      page.drawText(`Row ${count}: ${row.name}`);
+
+      // Añadir imagen PNG al PDF
+      const pngImage = await pdfDoc.embedPng(pngBuffer);
+      page.drawImage(pngImage, {
+        x: 0,
+        y: 0,
+        width: page.getWidth(),
+        height: page.getHeight()
+      });
+
       const pdfBytes = await pdfDoc.save();
 
       // Agregar al zip
