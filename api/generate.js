@@ -17,7 +17,7 @@ const convertSvgToPDF = async (svgText) => {
     format: "a4"
   });
 
-  await svg2pdf(svg, doc, { x: 0, y: 0, width: 500, height: 500 });
+  await svg2pdf(svgText, doc, { x: 0, y: 0, width: 500, height: 500 });
 
   // Save PDF and trigger download
   const pdfBytes = doc.output("arraybuffer");
