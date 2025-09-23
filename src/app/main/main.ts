@@ -22,7 +22,7 @@ import { Step4 } from '../step-4/step-4';
       } @else if (progress===2) {
         <app-step-3 (nextStep)="handleNextStep()" [svgFile]="svgFile" [csvFile]="csvFile" (url)="getDownloadUrl($event)"></app-step-3>
       } @else if (progress===3) {
-        <app-step-4 (nextStep)="handleNextStep()" ></app-step-4>
+        <app-step-4 (nextStep)="handleNextStep()" [downloadUrl]="downloadUrl" ></app-step-4>
       }
     </div>
   `,
