@@ -1,8 +1,6 @@
 import JSZip from "jszip";
 import { PDFDocument } from "pdf-lib";
 import Papa from "papaparse";
-import {jsPDF} from "jspdf";
-import "svg2pdf.js";
 import { PDFDocument } from 'pdf-lib';
 
 const convertSvgToPDF = async (svgText) => {
@@ -88,7 +86,7 @@ export default async function handler(req, res) {
 
       console.log(modifiedSvg);
       
-      const pdfBytes = convertSvgToPDF(modifiedSvg)
+      const pdfBytes = await convertSvgToPDF(modifiedSvg)
 
       // Agregar al zip
       zip.file(`file_${count}.pdf`, pdfBytes);
