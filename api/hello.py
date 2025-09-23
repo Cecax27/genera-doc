@@ -1,7 +1,12 @@
+# api/users.py
 from fastapi import FastAPI
 
 app = FastAPI()
 
-@app.get("/hello")
-def say_hello():
-    return {"message": "Hello, Vercel with FastAPI!"}
+@app.get("/")
+def get_all_users():
+    return {"users": ["Alice", "Bob"]}
+
+@app.get("/details")
+def get_user_details():
+    return {"details": "Some user details"}
