@@ -66,13 +66,13 @@ export class Step3 {
       next: (zipBlob) => {
         const url = window.URL.createObjectURL(zipBlob);
         this.url.emit(url)
+        this.nextStep.emit()
       },
       error: (err) => {
         console.error('Error al generar el zip:', err);
       }
     });
 
-    this.nextStep.emit()
   }
 
 }
