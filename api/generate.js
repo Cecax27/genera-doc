@@ -44,7 +44,7 @@ export default async function handler(req, res) {
       });
 
       // svgString: tu SVG obtenido de Inkscape
-      const svgBuffer = Buffer.from(svgString);
+      const svgBuffer = Buffer.from(modifiedSvg);
       const pngBuffer = await sharp(svgBuffer).png().toBuffer(); // Convierte SVG a PNG
 
       const pdfDoc = await PDFDocument.create();
