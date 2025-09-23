@@ -20,9 +20,9 @@ import { Step4 } from '../step-4/step-4';
           <div>Cargando...</div>
         }
       } @else if (progress===2) {
-        <app-step-3 (nextStep)="handleNextStep()" [svgFile]="svgFile" [csvFile]="csvFile"></app-step-3>
+        <app-step-3 (nextStep)="handleNextStep()" [svgFile]="svgFile" [csvFile]="csvFile" (url)="getDownloadUrl($event)"></app-step-3>
       } @else if (progress===3) {
-        <app-step-4 (nextStep)="handleNextStep()"></app-step-4>
+        <app-step-4 (nextStep)="handleNextStep()" ></app-step-4>
       }
     </div>
   `,
@@ -34,6 +34,7 @@ export class Main {
   svgFile = '';
   svgParams: string[] = [];
   csvFile = '';
+  downloadUrl = '';
 
   getSvgFile(svgString: string ){
     this.svgFile = svgString;
@@ -49,5 +50,9 @@ export class Main {
 
   handleNextStep() {
     this.nextStep.emit();
+  }
+
+  getDownloadUrl(downloadUrl: string) {
+    this.downloadUrl = downloadUrl;
   }
 }

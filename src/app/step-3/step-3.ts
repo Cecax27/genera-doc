@@ -1,5 +1,6 @@
 import { Component, Output, EventEmitter, Input, signal } from '@angular/core';
 import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
+import { ApiService } from '../services/api.service';
 
 @Component({
   selector: 'app-step-3',
@@ -32,7 +33,7 @@ import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
         </table>
       </div>
       <p class="text-xs italic text-gray-600">Se harán {{tableBody().length}} documentos.</p>
-      <input type="submit" (click)="nextStep.emit()" value="Continuar" class="bg-black py-3 px-10 text-white rounded-full cursor-pointer hover:bg-gray-700 transition-colors">
+      <input type="submit" (click)="onSubmit()" value="Continuar" class="bg-black py-3 px-10 text-white rounded-full cursor-pointer hover:bg-gray-700 transition-colors">
     </div>
   `,
   styles: ``
@@ -41,13 +42,14 @@ export class Step3 {
   @Output() nextStep = new EventEmitter<void>();
   @Input() svgFile: string = '';
   @Input() csvFile: string = '';
+  @Output() url = new EventEmitter<string>();
 
   headers = signal<string[]>([]);
   tableBody = signal<string[][]>([]);
 
   sanitizedSvg: SafeHtml = '';
 
-  constructor(private sanitizer: DomSanitizer) {}
+  constructor(private sanitizer: DomSanitizer, private api: ApiService) {}
 
   ngOnChanges() {
     if (this.svgFile) {
@@ -56,6 +58,21 @@ export class Step3 {
     }
     this.headers.set(this.csvFile.split('\n')[0].split(',').map(header => header.trim()));
     this.tableBody.set(this.csvFile.split('\n').slice(1).map(row => row.split(',').map(cell => cell.trim())).filter(row => row.length === this.headers().length));
+  }
+
+  onSubmit() {
+
+    this.api.generateZip(this.svgFile, this.csvFile).subscribe({
+      next: (zipBlob) => {
+        const url = window.URL.createObjectURL(zipBlob);
+        this.url.emit(url)
+      },
+      error: (err) => {
+        console.error('Error al generar el zip:', err);
+      }
+    });
+
+    this.nextStep.emit()
   }
 
 }
