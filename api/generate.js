@@ -1,6 +1,9 @@
 import JSZip from "jszip";
 import { PDFDocument } from "pdf-lib";
 import Papa from "papaparse";
+import { jsPDF } from "jspdf";
+import svg2pdf from "svg2pdf.js";
+
 
 export const config = {
   runtime: "nodejs",
@@ -9,41 +12,18 @@ export const config = {
 const convertSvgToPDF = async (svgText) => {
   if (!svgText) return;
   
-  // Create a new canvas
-  const canvas = document.createElement('canvas');
-  const context = canvas.getContext('2d');
-  const img = new Image();
+  const doc = new jsPDF({
+    unit: "pt",
+    format: "a4"
+  });
 
-  // Set up canvas size based on SVG dimensions
-  img.onload = async () => {
-    canvas.width = img.width;
-    canvas.height = img.height;
-    context.drawImage(img, 0, 0, img.width, img.height);
+  await svg2pdf(svg, doc, { x: 0, y: 0, width: 500, height: 500 });
 
-    // Get the canvas as a PNG
-    const pngUrl = canvas.toDataURL('image/png');
-    
-    // Create PDF using pdf-lib
-    const pdfDoc = await PDFDocument.create();
-    const page = pdfDoc.addPage([img.width, img.height]);
+  // Save PDF and trigger download
+  const pdfBytes = doc.output("arraybuffer");
 
-    // Embed PNG image into PDF
-    const pngImage = await pdfDoc.embedPng(pngUrl);
-    page.drawImage(pngImage, {
-      x: 0,
-      y: 0,
-      width: img.width,
-      height: img.height,
-    });
+  return pdfBytes;
 
-    // Save PDF and trigger download
-    const pdfBytes = await pdfDoc.save();
-
-    return pdfBytes;
-  };
-
-  // Set the SVG file data as the image source
-  img.src = `data:image/svg+xml;base64,${btoa(svgText)}`;
 };
 
 export default async function handler(req, res) {
