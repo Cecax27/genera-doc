@@ -81,8 +81,6 @@ export default async function handler(req, res) {
       params.forEach(param => {
         modifiedSvg = modifiedSvg.replace(`{{${param}}}`, row.param);
       });
-
-      console.log(modifiedSvg);
       
       const pdfBytes = awaitconvertSvgToPDF(modifiedSvg)
 
