@@ -23,7 +23,7 @@ export default async function handler(req, res) {
     const { svg, csv } = body;
     const params = csv.split('\n')[0].split(',').map(param => param.trim())
     // Parsear CSV
-    const { data: rows } = Papa.parse(csv, { header: true });
+    const { data: rows } = Papa.parse(csv, { header: true, transformHeader: (h) => h.trim() });
 
     // Crear ZIP
     const zip = new JSZip();
@@ -33,7 +33,7 @@ export default async function handler(req, res) {
       // Modificar el SVG (ejemplo: reemplazar marcador {{name}})
       let modifiedSvg = svg;
       params.forEach(param => {
-         const value = row[param] || row[0] || params;
+         const value = row[param] || param;
           const regex = new RegExp(`\\{\\{\\s*${param}\\s*\\}\\}`, "g");
         modifiedSvg = modifiedSvg.replace(regex, value);
       });
