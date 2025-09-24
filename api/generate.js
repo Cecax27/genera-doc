@@ -22,11 +22,9 @@ export default async function handler(req, res) {
 
     const { svg, csv } = body;
     const params = [...new Set(
-          csv
-            .split("{{")
-            .slice(1)
-            .map((param) => param.split("}}")[0].trim())
-        )];
+      [...svg.matchAll(/\{\{\s*(.*?)\s*\}\}/g)].map(match => match[1])
+    )];
+
     // Parsear CSV
     const { data: rows } = Papa.parse(csv, { header: true });
 
@@ -38,10 +36,12 @@ export default async function handler(req, res) {
       // Modificar el SVG (ejemplo: reemplazar marcador {{name}})
       let modifiedSvg = svg;
       params.forEach(param => {
-        modifiedSvg = modifiedSvg.replace(`{{${param}}}`, row.param);
+         const value = row[param] || "";
+          const regex = new RegExp(`\\{\\{\\s*${param}\\s*\\}\\}`, "g");
+        modifiedSvg = modifiedSvg.replace(regex, value);
       });
       
-      zip.file(`file_${idx + 1}.svg`, modifiedSvg);
+      zip.file(`${row.filename || "file_" + (idx + 1)}.svg`, modifiedSvg);
       count++;
     })
 
@@ -49,7 +49,7 @@ export default async function handler(req, res) {
     const zipContent = await zip.generateAsync({ type: "nodebuffer" });
 
     res.setHeader("Content-Type", "application/zip");
-    res.setHeader("Content-Disposition", "attachment; filename=output.zip");
+    res.setHeader("Content-Disposition", "attachment; filename=genera-doc.zip");
     res.status(200).send(zipContent);
   } catch (err) {
     res.status(500).json({ error: err.message });
