@@ -21,10 +21,7 @@ export default async function handler(req, res) {
     });
 
     const { svg, csv } = body;
-    const params = [...new Set(
-      [...svg.matchAll(/\{\{\s*(.*?)\s*\}\}/g)].map(match => match[1])
-    )];
-
+    const params = [...new Set( svg.split("{{").slice(1).map((param) => param.split("}}")[0].trim()) )];
     // Parsear CSV
     const { data: rows } = Papa.parse(csv, { header: true });
 
@@ -36,7 +33,7 @@ export default async function handler(req, res) {
       // Modificar el SVG (ejemplo: reemplazar marcador {{name}})
       let modifiedSvg = svg;
       params.forEach(param => {
-         const value = row[param] || "";
+         const value = row[param] || row;
           const regex = new RegExp(`\\{\\{\\s*${param}\\s*\\}\\}`, "g");
         modifiedSvg = modifiedSvg.replace(regex, value);
       });
