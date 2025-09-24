@@ -33,7 +33,7 @@ export default async function handler(req, res) {
       // Modificar el SVG (ejemplo: reemplazar marcador {{name}})
       let modifiedSvg = svg;
       params.forEach(param => {
-         const value = row[param] || row;
+         const value = row[param] || row.keys().join("-");
           const regex = new RegExp(`\\{\\{\\s*${param}\\s*\\}\\}`, "g");
         modifiedSvg = modifiedSvg.replace(regex, value);
       });
