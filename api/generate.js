@@ -1,27 +1,8 @@
 import JSZip from "jszip";
-import { PDFDocument } from "pdf-lib";
 import Papa from "papaparse";
-import { jsPDF } from "jspdf";
-import svg2pdf from "svg2pdf.js";
-import ConvertApi from 'convertapi-js'
-
-let convertApi = ConvertApi.auth(process.env.CONVERTAPI_TOKEN)
 
 export const config = {
   runtime: "nodejs",
-};
-
-const convertSvgToPDF = async (svgText) => {
-  if (!svgText) return;
-  
-  let params = convertApi.createParams()
-  params.add('File', svgText);
-  let result = await convertApi.convert('svg', 'pdf', params)
-
-  const pdfBytes = result;
-
-  return pdfBytes;
-
 };
 
 export default async function handler(req, res) {
@@ -62,7 +43,7 @@ export default async function handler(req, res) {
       
       zip.file(`file_${idx + 1}.svg`, modifiedSvg);
       count++;
-    }
+    })
 
     // Generar zip final
     const zipContent = await zip.generateAsync({ type: "nodebuffer" });
