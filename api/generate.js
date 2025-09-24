@@ -3,7 +3,9 @@ import { PDFDocument } from "pdf-lib";
 import Papa from "papaparse";
 import { jsPDF } from "jspdf";
 import svg2pdf from "svg2pdf.js";
+import ConvertApi from 'convertapi-js'
 
+let convertApi = ConvertApi.auth(process.env.CONVERTAPI_TOKEN)
 
 export const config = {
   runtime: "nodejs",
@@ -12,15 +14,11 @@ export const config = {
 const convertSvgToPDF = async (svgText) => {
   if (!svgText) return;
   
-  const doc = new jsPDF({
-    unit: "pt",
-    format: "a4"
-  });
+  let params = convertApi.createParams()
+  params.add('File', svgText);
+  let result = await convertApi.convert('svg', 'pdf', params)
 
-  await svg2pdf(svgText, doc, { x: 0, y: 0, width: 500, height: 500 });
-
-  // Save PDF and trigger download
-  const pdfBytes = doc.output("arraybuffer");
+  const pdfBytes = result;
 
   return pdfBytes;
 
@@ -55,17 +53,14 @@ export default async function handler(req, res) {
     const zip = new JSZip();
     let count = 1;
 
-    for (const row of rows) {
+    rows.forEach((row, idx) => {
       // Modificar el SVG (ejemplo: reemplazar marcador {{name}})
       let modifiedSvg = svg;
       params.forEach(param => {
         modifiedSvg = modifiedSvg.replace(`{{${param}}}`, row.param);
       });
       
-      const pdfBytes = await convertSvgToPDF(modifiedSvg)
-
-      // Agregar al zip
-      zip.file(`file_${count}.pdf`, pdfBytes);
+      zip.file(`file_${idx + 1}.svg`, modifiedSvg);
       count++;
     }
 
